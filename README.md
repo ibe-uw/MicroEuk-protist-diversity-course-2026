@@ -13,7 +13,7 @@ Table of Contents
 - [Day-2-From-Taxa-to-Diversity](#Day-2-From-Taxa-to-Diversity)
   - [Introduction](#Introduction)
   - [Diversity-analysis](#Diversity-analysis)
-  - [Merging-OTU-and-taxonomy tables](#Merging-OTU-and-taxonomy-tables)
+  - [Merging-OTU-and-taxonomy-tables](#Merging-OTU-and-taxonomy-tables)
 <!--- TOC END -->
 
 
