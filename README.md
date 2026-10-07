@@ -1,6 +1,6 @@
 # MicroEuk: Protist diversity course, October 2026, Urwitałt, Poland
 
-This is a protocol for the bioinformatic part of the course. 
+This is a protocol for the bioinformatic part of the **Practical Course on Analysing the Diversity of Microbial Eukaryotes in Environments**. 
 
 
 <!--- TOC START -->
@@ -21,9 +21,10 @@ Table of Contents
 ## DAY 1 - From Reads to Taxa
 
 
+
 ### Introduction
 
-On the first day of the data analysis part of the **Practical course on analysing the diversity of microbial eukaryotes in environments**, you'll primarily work in the terminal. You will use bioinformatic software installed in [conda](https://anaconda.org/anaconda/conda) package management system. We will analyse nanopore data using [BaNaNA](https://github.com/ibe-uw/BaNaNA) pipeline and illumina data using [QIIME2](https://qiime2.org) platform with special plugins.
+On the first day of the data analysis part of the course, you'll primarily work in the terminal. You will use bioinformatic software installed in [conda](https://anaconda.org/anaconda/conda) package management system. We will analyse nanopore data using [BaNaNA](https://github.com/ibe-uw/BaNaNA) pipeline and illumina data using [QIIME2](https://qiime2.org) platform with special plugins.
 
 We will be using [ICM UW](https://icm.edu.pl) server. To login to the server using terminal type:
 
@@ -46,6 +47,121 @@ scp file login@hpc.icm.edu.pl:~/location_of_the_file # To copy a file from your 
 ### Nanopore
 
 
+To analyse nanopore data we will be using [BaNaNA](https://github.com/ibe-uw/BaNaNA) pipeline. 
+
+
+#### 1. Quality check
+
+For nanopore data we will use [NanoPlot](https://github.com/wdecoster/NanoPlot). 
+
+```
+conda activate nanopore
+for folder in *; do NanoPlot --fastq "$folder"/*.fastq --tsv_stats --info_in_report -o "$folder"/nanoplot_raw ; done
+```
+
+NanoPlot produces a lot of outputs. One of them is general statistics `NanoStats.txt`. The other ones are plots. Download to your computer two of them `LengthvsQualityScatterPlot_dot.png` and `Non_weightedHistogramReadlength.png` and inspect.
+
+
+#### 2. Downloading the repository
+
+Firstly, download the repository from GitHub to your computer and unzip it.
+
+
+#### 3. Fill in the config file
+
+Inside the main folder you will find `config.yaml` file. Fill it according to the instruction.
+
+* `sample_name`: Provide names of you samples.
+
+The name should only contain `-` sign (make sure you avoid `_` sign as well). Also, they need to be the same as the names of the FASTQ files. For example, if your files are `BAB10.fastq` and `MIK3.fastq`, then the `sample_name` option should look like this:
+
+```
+sample_name:
+ - BAB10
+ - MIK3
+```
+
+* `threads`: Number of threads to use by the pipeline. 
+* `min_len_filtering`: Lower threshold for your amplicon length filtering. 
+* `max_len_filtering`: Upper threshold for your amplicon length filtering. 
+* `rrnas`: Your amplicons may be longer than 18S rRNA gene and contain multiple rRNA genes (like 5.8S rRNA and 28S rRNA for eukaryotes). Specify all rRNA genes included in your whole amplicon and their minimal length contained in the amplicon.
+
+If your amplicon contains three genes, this option should look like this:
+
+```
+rrnas: 18S_rRNA:1000,5_8S_rRNA:90,28S_rRNA:400
+```
+
+And if you amplicon contains only 18S rRNA gene, this option should look like this:
+
+```
+rrnas: 18S_rRNA:1000
+```
+
+* `chosen_rrna`: Specify which rRNA gene, included in the `rrnas` option you want to keep for futher analysis. Choose only one gene, ***the default one is `18S_rRNA` gene***.
+* `db_location`: Provide absolute path to the reference database you want to use to assign the taxonomy with.
+* `db_id`: Specify minimal identity of OTUs to the closest reference sequence for taxonomic annotation. ***Default is `0.7`***.
+* `db_query_cov`: Specify minimal coverage of OTUs to the closest reference sequence for taxonomic annotation. ***Default is `0.9`***.
+* `enable_optional_taxonomy_format`: It's an optional step applied only for the PR2 database UTAX version (look ***Download PR2 database*** chapter), which creates a tab-separated table from raw VSEARCH output. If you are using a different database than PR2 or a different version of PR2 database, set this option to `false`.
+
+
+#### 4. Preparing the repository
+
+On the server create a folder for nanopore analysis.
+
+```
+mkdir nanopore
+```
+
+Upload the repository to the created folder.
+
+```
+scp -r BaNaNA-main login@hpc.icm.edu.pl:~/nanopore
+```
+
+Make all the scripts executable
+
+```
+chmod a+x nanopore/BaNaNA-main/scripts/*
+```
+
+Create folder for samples inside the repository
+
+```
+cd nanopore/BaNaNA-main
+mkdir samples
+```
+
+Copy raw reads to the `samples` folder
+
+```
+cp ../../../xxxxx samples
+```
+
+#### 5. Run the pipeline
+
+Run the command to install or the dependencies.
+
+```
+snakemake --use-conda --conda-create-envs-only
+```
+
+If everything installed correctly run the analysis.
+
+```
+snakemake --configfile config.yaml --use-conda
+```
+
+
+#### 6. Find the final output
+
+The piepline creates a folder `final` and places there all four final output files:
+* `otus.fasta` - final OTUs sequences
+* `otu_table.tsv` - table of abundance of each OTU in each sample
+* `taxonomy.tsv` - taxonomy of each OTU directly from VSEARCH
+* `taxonomy_table.tsv` - taxonomy of each OTU in a form of a TSV table (created based on `taxonomy.tsv`)
+
+
 
 
 
@@ -59,7 +175,7 @@ scp file login@hpc.icm.edu.pl:~/location_of_the_file # To copy a file from your 
 
 #### 1. Downloading scripts and preparing the working environment
 
-First, download the repository from GitHub to your computer, unzip and then navigate to the unzipped directory. Next, upload the folder 'scripts_illumina' to your home folder on the server using the command below (or another solution that works on your system)
+First, download the repository from GitHub to your computer, unzip and then navigate to the unzipped directory. Next, upload the folder `scripts_illumina` to your home folder on the server using the command below (or another solution that works on your system)
 
 ```
 scp -r scripts_illumina login@hpc.icm.edu.pl:~
