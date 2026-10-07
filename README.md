@@ -52,7 +52,20 @@ To analyse nanopore data we will be using [BaNaNA](https://github.com/ibe-uw/BaN
 
 #### 1. Quality check
 
-For nanopore data we will use [NanoPlot](https://github.com/wdecoster/NanoPlot). 
+
+Firstly, on the server create a folder for nanopore analysis.
+
+```
+mkdir nanopore
+```
+
+And copy raw reads there.
+
+```
+cp ../../xxxx nanopore
+```
+
+To check quality of the data we will use [NanoPlot](https://github.com/wdecoster/NanoPlot). 
 
 ```
 conda activate nanopore
@@ -107,12 +120,6 @@ rrnas: 18S_rRNA:1000
 
 #### 4. Preparing the repository
 
-On the server create a folder for nanopore analysis.
-
-```
-mkdir nanopore
-```
-
 Upload the repository to the created folder.
 
 ```
@@ -122,20 +129,20 @@ scp -r BaNaNA-main login@hpc.icm.edu.pl:~/nanopore
 Make all the scripts executable
 
 ```
-chmod a+x nanopore/BaNaNA-main/scripts/*
+chmod a+x BaNaNA-main/scripts/*
 ```
 
 Create folder for samples inside the repository
 
 ```
-cd nanopore/BaNaNA-main
+cd BaNaNA-main
 mkdir samples
 ```
 
 Copy raw reads to the `samples` folder
 
 ```
-cp ../../../xxxxx samples
+cp ../*.fastq samples
 ```
 
 #### 5. Run the pipeline
