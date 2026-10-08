@@ -1,0 +1,11 @@
+sample-id	forward-absolute-filepath	reverse-absolute-filepath
+BAB10	/lu/topola/projects/microeuk/illumina_raw/final/V4_lakes/raw_data/BAB10_18S_S31_R1_001.fastq.gz	/lu/topola/projects/microeuk/illumina_raw/final/V4_lakes/raw_data/BAB10_18S_S31_R2_001.fastq.gz
+KRA10	/lu/topola/projects/microeuk/illumina_raw/final/V4_lakes/raw_data/KRA10_18S_S29_R1_001.fastq.gz	/lu/topola/projects/microeuk/illumina_raw/final/V4_lakes/raw_data/KRA10_18S_S29_R2_001.fastq.gz
+KUC10	/lu/topola/projects/microeuk/illumina_raw/final/V4_lakes/raw_data/KUC10_18S_S37_R1_001.fastq.gz	/lu/topola/projects/microeuk/illumina_raw/final/V4_lakes/raw_data/KUC10_18S_S37_R2_001.fastq.gz
+MIK10	/lu/topola/projects/microeuk/illumina_raw/final/V4_lakes/raw_data/MIK10_18S_S33_R1_001.fastq.gz	/lu/topola/projects/microeuk/illumina_raw/final/V4_lakes/raw_data/MIK10_18S_S33_R2_001.fastq.gz
+PRZ10	/lu/topola/projects/microeuk/illumina_raw/final/V4_lakes/raw_data/PRZ10_18S_S35_R1_001.fastq.gz	/lu/topola/projects/microeuk/illumina_raw/final/V4_lakes/raw_data/PRZ10_18S_S35_R2_001.fastq.gz
+BAB3	/lu/topola/projects/microeuk/illumina_raw/final/V4_lakes/raw_data/BAB3_18S_S30_R1_001.fastq.gz	/lu/topola/projects/microeuk/illumina_raw/final/V4_lakes/raw_data/BAB3_18S_S30_R2_001.fastq.gz
+KRA3	/lu/topola/projects/microeuk/illumina_raw/final/V4_lakes/raw_data/KRA3_18S_S28_R1_001.fastq.gz	/lu/topola/projects/microeuk/illumina_raw/final/V4_lakes/raw_data/KRA3_18S_S28_R2_001.fastq.gz
+KUC3	/lu/topola/projects/microeuk/illumina_raw/final/V4_lakes/raw_data/KUC3_18S_S36_R1_001.fastq.gz	/lu/topola/projects/microeuk/illumina_raw/final/V4_lakes/raw_data/KUC3_18S_S36_R2_001.fastq.gz
+MIK3	/lu/topola/projects/microeuk/illumina_raw/final/V4_lakes/raw_data/MIK3_18S_S32_R1_001.fastq.gz	/lu/topola/projects/microeuk/illumina_raw/final/V4_lakes/raw_data/MIK3_18S_S32_R2_001.fastq.gz
+PRZ3	/lu/topola/projects/microeuk/illumina_raw/final/V4_lakes/raw_data/PRZ3_18S_S34_R1_001.fastq.gz	/lu/topola/projects/microeuk/illumina_raw/final/V4_lakes/raw_data/PRZ3_18S_S34_R2_001.fastq.gz
