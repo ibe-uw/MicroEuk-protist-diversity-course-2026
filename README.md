@@ -62,13 +62,14 @@ mkdir nanopore
 And copy raw reads there.
 
 ```
-cp ../../xxxx nanopore
+cp ../../projects/microeuk/nanopore_raw nanopore
 ```
 
 To check quality of the data we will use [NanoPlot](https://github.com/wdecoster/NanoPlot). 
 
 ```
-conda activate nanopore
+conda activate nanoplot
+cd nanopore
 for folder in *; do NanoPlot --fastq "$folder"/*.fastq --tsv_stats --info_in_report -o "$folder"/nanoplot_raw ; done
 ```
 
