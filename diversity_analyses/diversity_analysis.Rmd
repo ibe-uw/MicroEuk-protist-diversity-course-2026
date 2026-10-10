@@ -1,0 +1,401 @@
+```{r}
+# Practical Course on Analysing the Diversity of Microbial Eukaryotes in Environments, October 2026, Urwitałt, Poland
+# Małgorzata Chwalińska and Marta Sałek
+
+
+library("phyloseq")
+library("readxl")
+library("dplyr")
+library("tidyverse")
+library("vegan")
+library("ggplot2")
+library("ggsignif")
+library("UpSetR")
+```
+
+Importing file and creating phyloseq object
+```{r}
+table <- read_excel("otu_table.xlsx")
+taxonomy <- read_excel("taxonomy_table.xlsx")
+samples <-  read_excel("sample_table.xlsx")
+
+
+table <- table %>%
+  column_to_rownames("OTU")
+taxonomy <- taxonomy %>%
+  column_to_rownames("OTU")
+samples <- samples %>%
+  column_to_rownames("sample_id")
+
+table <- as.matrix(table)
+taxonomy <- as.matrix(taxonomy)
+
+ASV = otu_table(table, taxa_are_rows = TRUE)
+TAX = tax_table(taxonomy)
+SAM = sample_data(samples)
+TREE = read_tree("fasttree_otus_rooted.tre") # If the tree is available
+  
+phylo_obj <- phyloseq(ASV, TAX, SAM, TREE) # If the tree is available
+#phylo_obj <- phyloseq(ASV, TAX, SAM)
+phylo_obj
+
+```
+
+Filtering sequences
+```{r}
+# Filtering sequences with abundance less than 10 in all samples
+phylo_obj <- filter_taxa(phylo_obj, function(x) sum(x) >= 10, TRUE)
+
+# Extracting only eukaryotic sequences
+phylo_obj <- subset_taxa(phylo_obj, Domain %in% c("Eukaryota"))
+```
+
+Barplots
+```{r}
+# Changing abundances to relative abundances
+phylo_obj_pc <- transform_sample_counts(phylo_obj, function(x) x / sum(x))
+
+plot_bar(phylo_obj_pc, fill = "Subdivision") +
+  geom_bar(aes(color=Subdivision, fill=Subdivision), stat="identity", position="stack")+
+  facet_grid(~zone, scales = "free_x") +
+  theme(legend.title=element_blank())+
+  scale_color_manual(values=c("#ee0148", "#14aaff", "#b52b00", "#a8dbf0", "#b009d1", "#c6e000", "#0159f2", "#ff8e4d", "#016d59", "#ff7071", "#3c5ca3", "#01d761", "#cb009a", "#8ee4c5", "#6f5b39", "#40ecc6", "#ff00a1", "#c3dd81", "#91407c", "#1eefa9", "#af8900", "#d0b9ff", "#006f2c", "#f6d04b", "#4c616b")) +
+  scale_fill_manual(values=c("#ee0148", "#14aaff", "#b52b00", "#a8dbf0", "#b009d1", "#c6e000", "#0159f2", "#ff8e4d", "#016d59", "#ff7071", "#3c5ca3", "#01d761", "#cb009a", "#8ee4c5", "#6f5b39", "#40ecc6", "#ff00a1", "#c3dd81", "#91407c", "#1eefa9", "#af8900", "#d0b9ff", "#006f2c", "#f6d04b", "#4c616b")) +
+  theme(plot.title = element_text(hjust = 0.5), legend.key.size = unit(2, 'mm')) +
+  theme(axis.text.x = element_text(angle = 270))
+ggsave("barplots_euk.png", plot = last_plot())
+```
+
+Rarefaction curve
+```{r}
+# Preparing OTU table to calculate rarefaction curve
+tab <- otu_table(phylo_obj)
+class(tab) <- "matrix"
+tab <- t(tab)
+
+# Calculating rarefaction curve
+png(file = "rarecurve.png", width=1200, height=700)
+rare <- rarecurve(tab, step=1000, lwd=2, ylab="OTU",  label=T)
+dev.off()
+```
+
+Filtering out nonprotist sequences
+```{r}
+phylo_obj <- subset_taxa(phylo_obj, !(Subdivision %in% c("Metazoa", "Fungi", "Streptophyta_X")))
+
+# Removing empty samples
+phylo_obj <- prune_samples(sample_sums(phylo_obj) > 0, phylo_obj)
+
+```
+
+Barplots again
+```{r}
+# Changing abundances to relative abundances
+phylo_obj_pc <- transform_sample_counts(phylo_obj, function(x) x / sum(x))
+
+plot_bar(phylo_obj_pc, fill = "Subdivision", facet_grid=~zone) +
+  geom_bar(aes(color=Subdivision, fill=Subdivision), stat="identity", position="stack")+
+  facet_grid(~zone, scales = "free_x") +
+  theme(legend.title=element_blank())+
+  scale_color_manual(values=c("#ee0148", "#14aaff", "#b52b00", "#a8dbf0", "#b009d1", "#c6e000", "#0159f2", "#ff8e4d", "#016d59", "#ff7071", "#3c5ca3", "#01d761", "#cb009a", "#8ee4c5", "#6f5b39", "#40ecc6", "#ff00a1", "#c3dd81", "#91407c", "#1eefa9", "#af8900", "#d0b9ff", "#006f2c", "#f6d04b", "#4c616b")) +
+  scale_fill_manual(values=c("#ee0148", "#14aaff", "#b52b00", "#a8dbf0", "#b009d1", "#c6e000", "#0159f2", "#ff8e4d", "#016d59", "#ff7071", "#3c5ca3", "#01d761", "#cb009a", "#8ee4c5", "#6f5b39", "#40ecc6", "#ff00a1", "#c3dd81", "#91407c", "#1eefa9", "#af8900", "#d0b9ff", "#006f2c", "#f6d04b", "#4c616b")) +
+  theme(plot.title = element_text(hjust = 0.5), legend.key.size = unit(2, 'mm')) +
+  theme(axis.text.x = element_text(angle = 270))
+ggsave("barplots_filt.png", plot = last_plot())
+```
+
+Rarefaction curve again
+```{r}
+# Preparing OTU table to calculate rarefaction curve
+tab <- otu_table(phylo_obj)
+class(tab) <- "matrix"
+tab <- t(tab)
+
+# Calculating rarefaction curve
+png(file = "rarecurve_filt.png", width=1200, height=700)
+rare <- rarecurve(tab, step=1000, lwd=2, ylab="OTU",  label=T)
+dev.off()
+```
+
+Rarefying the samples for alpha diversity (optional)
+```{r}
+phylo_obj_rarefied <- rarefy_even_depth(phylo_obj, sample.size = 1000, rngseed = 123, replace = FALSE, trimOTUs = TRUE)
+```
+
+Alpha diversity
+```{r}
+# Alpha diversity for samples without rarefaction
+plot_richness(phylo_obj)
+
+# Alpha diversity for samples after rarefaction
+plot_richness(phylo_obj_rarefied)
+
+# Correlation of alpha diversity index with number of reads
+reads <- sample_sums(phylo_obj)
+
+alpha <- estimate_richness(phylo_obj, measures = "Observed")
+cor.test(reads, alpha$Observed, method = "spearman")
+
+alpha <- estimate_richness(phylo_obj, measures = "Shannon")
+cor.test(reads, alpha$Shannon, method = "spearman")
+
+alpha <- estimate_richness(phylo_obj, measures = "Simpson")
+cor.test(reads, alpha$Simpson, method = "spearman")
+
+# Plotting groups and checking if number of reads are different within groups 
+sample_data(phylo_obj)$Reads <- sample_sums(phylo_obj)
+wilcox.test(Reads ~ zone,
+            data = data.frame(sample_data(phylo_obj)))
+pr = plot_richness(phylo_obj, x="zone", color ="zone", measures = c("Observed", "Chao1", "Shannon", "Simpson"))
+pr + geom_boxplot() + geom_signif(comparisons = list(c("photic", "aphotic")), test=wilcox.test, map_signif_level = TRUE)
+ggsave("alpha_groups.png", plot = last_plot())
+```
+
+Upset plot
+```{r}
+# Transform counts to presence/absence
+phylo_obj_pa <- transform_sample_counts(phylo_obj, function(x) ifelse(x > 0, 1, 0))
+otu <- as.data.frame(otu_table(phylo_obj_pa))
+if (!taxa_are_rows(phylo_obj_pa)) {
+  otu <- t(otu)
+}
+# Extract groups
+metadata <- as.data.frame(sample_data(phylo_obj_pa))
+groups <- metadata$zone
+# Create presence/absence by group
+otu_group <- sapply(unique(groups), function(g) {
+  rowSums(otu[, groups == g, drop = FALSE]) > 0
+})
+# Convert TRUE/FALSE to 1/0
+otu_group <- as.data.frame(otu_group * 1)
+head(otu_group)
+# Plot
+png(file = "upset.png", width=1200, height=700)
+upset(
+  otu_group,
+  sets = colnames(otu_group),
+  order.by = "freq",
+  sets.bar.color = "steelblue",
+  main.bar.color = "darkred",
+  number.angles = 30,
+  text.scale = 2
+)
+dev.off()
+```
+
+Beta diversity and ordination
+```{r}
+### Calculating PCoA for three diversity indices ###
+bray <- ordinate(phylo_obj, "PCoA", "bray")
+plot_ordination(phylo_obj, bray, color="zone", shape = "lake") +
+  stat_ellipse(aes(color = zone, group = zone), type = "t", level = 0.95)+
+  theme_minimal()
+ggsave('bray_pcoa.png', plot = last_plot())
+
+jaccard <- ordinate(phylo_obj, "PCoA", "jaccard")
+plot_ordination(phylo_obj, jaccard, color="zone", shape = "lake") +
+  stat_ellipse(aes(color = zone, group = zone), type = "t", level = 0.95)+
+  theme_minimal()
+ggsave('jaccard_pcoa.png', plot = last_plot())
+
+wunif <- ordinate(phylo_obj, "PCoA", "wunifrac") # Do only when sequence tree was uploaded
+plot_ordination(phylo_obj, wunif, color="zone", shape = "lake") +
+  stat_ellipse(aes(color = zone, group = zone), type = "t", level = 0.95)+
+  theme_minimal()
+ggsave('wunif_pcoa.png', plot = last_plot())
+
+### Calculation dendrogram based on one index ###
+otu <- as(otu_table(phylo_obj), "matrix")
+if (taxa_are_rows(phylo_obj)) {
+  otu <- t(otu)
+}
+bray <- vegdist(otu,  method = "bray")
+
+# Hierarchical clustering
+hclust_result <- hclust(bray, method = "average")
+
+png(file = "dendrogram_bray.png", width=1200, height=700)
+plot(hclust_result, 
+     main = "Bray-Curtis dissimilarity dendrogram",
+     xlab = "", 
+     ylab = "Bray-Curtis dissimilarity",
+     sub = "")
+dev.off()
+
+### NMDS - stress plot and three beta diversity indices ###
+# Calculate diversity index
+otu <- as(otu_table(phylo_obj), "matrix")
+if (taxa_are_rows(phylo_obj)) {
+  otu <- t(otu)
+}
+bray <- vegdist(otu,  method = "bray")
+
+# Define a function NMDS.scree() that automatically performs a NMDS for 1-5 dimensions and plots the nr of dimensions vs the stress
+NMDS.scree <- function(x) { #where x is the name of the data frame variable
+  plot(rep(1, 5), replicate(5, metaMDS(x, autotransform = F, k = 1)$stress), xlim = c(1, 5),ylim = c(0, 0.30), xlab = "# of Dimensions", ylab = "Stress", main = "NMDS stress plot")
+  for (i in 1:5) {
+    points(rep(i + 1,5),replicate(5, metaMDS(x, autotransform = F, k = i + 1)$stress))
+  }
+}
+
+# Run the function
+png(file = "stress_plot_nmds.png", width=1200, height=700)
+NMDS.scree(bray)
+dev.off()
+
+# Calculate and plot NMDS for preferred number of dimensions
+bray <- ordinate(phylo_obj, "NMDS", "bray", k = 3)
+plot_ordination(phylo_obj, bray, color="zone", shape = "lake") +
+  stat_ellipse(aes(color = zone, group = zone), type = "t", level = 0.95)+
+  theme_minimal()
+ggsave('bray_nmds.png', plot = last_plot())
+
+### Reapeat NMDS calculations for the rest of the indices ###
+
+```
+
+Different ordinations
+```{r}
+# Checking gradient length by calculating DCA
+otu <- as(otu_table(phylo_obj), "matrix")
+if (taxa_are_rows(phylo_obj)) {
+  otu <- t(otu)
+}
+dca <- decorana(otu)
+dca
+```
+
+```{r}
+# Extract OTU table
+otu <- as(otu_table(phylo_obj), "matrix")
+if (taxa_are_rows(phylo_obj)) {
+  otu <- t(otu)
+}
+
+# Extract metadata
+meta <- data.frame(sample_data(phylo_obj))
+meta <- meta %>%
+  select(zone, lake, trophy, PPO4, PT, NNH4, Cl, temp, oxy) %>%
+  mutate(across(where(is.character), as.factor))
+meta$PPO4 <- as.numeric(meta$PPO4)
+meta$PT <- as.numeric(meta$PT)
+meta$NNH4 <- as.numeric(meta$NNH4)
+meta$Cl <- as.numeric(meta$Cl)
+meta$temp <- as.numeric(meta$temp)
+meta$oxy <- as.numeric(meta$oxy)
+
+# Perform CCA with selected environmental variables
+cca_result <- cca(otu ~ trophy + PPO4 + PT + NNH4 + Cl + temp + oxy, data = meta)
+
+# Check multicollinearity between your environmental variables
+vif.cca(cca_result)
+
+# Rerun CCA with removed trophy and check VIF again
+cca_result <- cca(otu ~ PPO4 + PT + NNH4 + Cl + temp + oxy, data = meta)
+vif.cca(cca_result)
+
+# Rerun CCA with removed PPO4
+cca_result <- cca(otu ~ PT + NNH4 + oxy + temp, data = meta)
+vif.cca(cca_result)
+
+# Extract scores
+site_scores <- as.data.frame(scores(cca_result, display = "sites"))
+site_scores$SampleID <- rownames(site_scores)
+
+# Add metadata
+meta <- data.frame(sample_data(phylo_obj))
+site_scores <- cbind(site_scores, meta)
+
+# Extract biplot arrows (environmental variables)
+env_scores <- as.data.frame(scores(cca_result, display = "bp"))
+env_scores$variable <- rownames(env_scores)
+env_scores <- env_scores %>%
+  filter(!grepl("lake", variable, ignore.case = TRUE))
+
+# Extract species scores
+sp_scores <- as.data.frame(scores(cca_result, display = "species"))
+
+# Plot
+ggplot() +
+  # Sample points
+  geom_point(data = site_scores, aes(x = CCA1, y = CCA2, color = meta$lake, shape = meta$zone), size = 3) +
+  # Environmental arrows
+  geom_segment(data = env_scores,aes(x = 0, y = 0, xend = CCA1, yend = CCA2),arrow = arrow(length = unit(0.3, "cm")),color = "red") +
+  # Species points
+  geom_point(data = sp_scores,aes(x = CCA1, y = CCA2),shape = 3, color = "grey50", size = 1, alpha = 0.5) +
+  # Arrow labels
+  geom_text(data = env_scores,aes(x = CCA1 * 1.1, y = CCA2 * 1.1, label = variable), color = "red", size = 3) +
+  theme_bw() +
+  labs(title = "CCA", x = "CCA1", y = "CCA2")
+ggsave('cca.png', plot = last_plot())
+
+### Check most infulential OTU ###
+# Extract species scores
+sp_scores <- as.data.frame(scores(cca_result, display = "species"))
+sp_scores$taxa <- rownames(sp_scores)
+
+# Calculate distance from origin — further = more influential
+sp_scores$distance <- sqrt(sp_scores$CCA1^2 + sp_scores$CCA2^2)
+
+# Keep only top N most influential taxa
+top_n <- 5  # adjust this number as needed
+sp_scores_top <- sp_scores %>%
+  arrange(desc(distance)) %>%
+  slice(1:top_n)
+
+ggplot() +
+  # Sample points
+  geom_point(data = site_scores, aes(x = CCA1, y = CCA2, color = meta$lake, shape = meta$zone), size = 3) +
+  # Environmental arrows
+  geom_segment(data = env_scores,aes(x = 0, y = 0, xend = CCA1, yend = CCA2),arrow = arrow(length = unit(0.3, "cm")), color = "red") +
+  # Arrow labels
+  geom_text(data = env_scores,aes(x = CCA1 * 1.1, y = CCA2 * 1.1, label = variable),color = "red", size = 3) +
+  # All species points
+  geom_point(data = sp_scores,aes(x = CCA1, y = CCA2),shape = 3, color = "grey80", size = 1, alpha = 0.3) +
+  # Top species points
+  geom_point(data = sp_scores_top,aes(x = CCA1, y = CCA2),shape = 3, color = "grey30", size = 2) +
+  # Top species labels — nudge to avoid overlapping points
+  geom_text(data = sp_scores_top,aes(x = CCA1, y = CCA2, label = taxa),color = "grey30", nudge_y = 0.05, size = 2.5) +
+  theme_bw() +
+  labs(title = "CCA", x = "CCA1", y = "CCA2")
+ggsave('cca2.png', plot = last_plot())
+```
+
+```{r}
+# Test whether each environmental variable significantly explains community composition
+env_anova <- anova.cca(cca_result, by = "margin", permutations = 999)
+
+# Barplots of contributions to variation
+sig_env <- rownames(env_anova)[env_anova$`Pr(>F)` <= 0.05]
+env_scores <- scores(cca_result, display = "bp", scaling = 2)
+env_lengths <- sqrt(rowSums(env_scores^2))
+total_inertia       <- cca_result$tot.chi
+constrained_inertia <- cca_result$CCA$tot.chi
+residual_inertia    <- total_inertia - constrained_inertia
+env_percent <- (env_lengths^2 / sum(env_lengths^2)) * (constrained_inertia / total_inertia) * 100
+df_env <- data.frame( Factor  = rownames(env_scores),Percent = env_percent,
+  Sig     = ifelse(rownames(env_scores) %in% sig_env,"Significant", "Non-significant"))
+df_resid <- data.frame(Factor  = "Residual",Percent = (residual_inertia / total_inertia) * 100,Sig = "Residual")
+df_plot <- rbind(df_env, df_resid)
+df_plot <- df_plot |> dplyr::arrange(desc(Percent))
+ggplot(df_plot, aes(x = reorder(Factor, Percent), y = Percent, fill = Sig)) +
+  geom_col(width = 0.7) +
+  geom_text(aes(label = paste0(round(Percent, 1), "%")), hjust = -0.1, size = 3.5) +
+  coord_flip() +
+  scale_fill_manual(values = c("Significant"= "steelblue","Non-significant" = "grey70","Residual" = "grey40")) +
+  labs(x = "Environmental Factor", y = "Percentage of total inertia (%)",
+    title = "Contr of Env Factors and Residuals", fill = "Term type" ) +
+  theme_minimal() +
+  ylim(0,80) +
+  theme( plot.title   = element_text(hjust = 0.5, face = "bold"),
+    axis.text    = element_text(size = 12),axis.title   = element_text(size = 14),
+    legend.title = element_text(size = 12),legend.text  = element_text(size = 11))
+ggsave('barplot_cca_variation.png', plot = last_plot())
+```
+
+
+
+
+
+
+
