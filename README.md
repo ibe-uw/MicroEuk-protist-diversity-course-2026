@@ -215,6 +215,7 @@ First, check read quality using [FastQC](https://www.bioinformatics.babraham.ac.
 
 ```
 mkdir fastqc
+Honda activate fastqc_env
 for file in /lu/topola/projects/microeuk/illumina_raw_data/*; do fastqc "$file" -outdir fastqc; done
 ```
 
@@ -234,7 +235,7 @@ scp login@hpc.icm.edu.pl:~/illumina/*.html localdirectory
 Now you will start working in the QIIME 2 environment.
 
 ```
-conda activate qiime2
+conda activate qiime2-2024.2_env
 ```
 
 
@@ -333,7 +334,8 @@ Download `feature-table.tsv` to your computer.
 You will assign taxonomy using the [VSEARCH](https://github.com/torognes/vsearch) software, which uses the global alignment method. For reference, you will use the [PR2](https://pr2-database.org) database.
 
 ```
-vsearch --usearch_global sequences.fasta --db /mnt/databases/pr2_db/pr2_database-5.0.0.fasta --blast6out taxonomy.tsv --id 0.70
+conda activate vsearch_env
+vsearch --usearch_global sequences.fasta --db /lu/topola/projects/microeuk/pr2_version_5.1.1_SSU_UTAX.fasta --blast6out taxonomy.tsv --id 0.70
 ```
 
 ***Which other databases and methods of assigning taxonomy do you know?***
