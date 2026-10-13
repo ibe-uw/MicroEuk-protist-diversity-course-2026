@@ -214,7 +214,8 @@ cd illumina
 First, check read quality using [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/). The Illumina sequencing reads from the experiment are available on the server.
 
 ```
-for file in ../../4UProtistDiversity/raw_illumina/*; do fastqc "$file" -o ./; done
+mkdir fastqc
+for file in /lu/topola/projects/microeuk/illumina_raw_data/*; do fastqc "$file" -outdir fastqc; done
 ```
 
 Download `.html` files on your computer and open them in the browser.
