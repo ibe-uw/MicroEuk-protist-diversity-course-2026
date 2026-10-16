@@ -42,6 +42,28 @@ scp -r login@hpc.icm.edu.pl:~/location_of_the_file ./ # To copy a folder to your
 scp file login@hpc.icm.edu.pl:~/location_of_the_file # To copy a file from your computer to the server
 ```
 
+After you login to the server activate script:
+
+```
+/lu/topola/projects/microeuk/microeuk_startup_script.sh
+```
+
+The script activates `screen` terminal.
+
+To check which screen you have type:
+
+```
+screen -ls
+```
+
+To login to the screen type:
+
+```
+screen -r name-of-the-screen
+```
+
+To exit the screen press CtrA+D on your keyboard.
+
 
 
 ### Nanopore
@@ -148,6 +170,13 @@ cp ../*.fastq samples
 
 #### 5. Run the pipeline
 
+Add condo channels.
+
+```
+conda config --add channels conda-forge
+conda config --add channels bioconda
+```
+
 Run the command to install or the dependencies.
 
 ```
@@ -157,7 +186,7 @@ snakemake --use-conda --conda-create-envs-only
 If everything installed correctly run the analysis.
 
 ```
-snakemake --configfile config.yaml --use-conda
+snakemake --configfile config.yaml --use-conda --cores 1
 ```
 
 
