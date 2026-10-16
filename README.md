@@ -62,7 +62,7 @@ To login to the screen type:
 screen -r name-of-the-screen
 ```
 
-To exit the screen press CtrA+D on your keyboard.
+To exit the screen press ***CtrA+D*** on your keyboard.
 
 
 
