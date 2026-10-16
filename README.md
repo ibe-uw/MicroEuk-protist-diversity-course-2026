@@ -59,7 +59,7 @@ screen -ls
 To login to the screen type:
 
 ```
-screen -r name-of-the-screen
+screen -r XXX.microeuk
 ```
 
 To exit the screen press ***CtrA+D*** on your keyboard.
@@ -98,14 +98,16 @@ for folder in *; do NanoPlot --fastq "$folder"/*.fastq --tsv_stats --info_in_rep
 NanoPlot produces a lot of outputs. One of them is general statistics `NanoStats.txt`. The other ones are plots. Download to your computer two of them `LengthvsQualityScatterPlot_dot.png` and `Non_weightedHistogramReadlength.png` and inspect.
 
 
-#### 2. Downloading the repository
+#### 2. Copy the repository from shared folder into the `nanopore` folder
 
-Firstly, download the repository from GitHub to your computer and unzip it.
+```
+cp ../../projects/microeuk/BaNaNA .
+```
 
 
 #### 3. Fill in the config file
 
-Inside the main folder you will find `config.yaml` file. Fill it according to the instruction.
+Inside the main folder you will find `config.yaml` file. Download it to your computer and Fill it according to the instruction.
 
 * `sample_name`: Provide names of you samples.
 
@@ -143,11 +145,8 @@ rrnas: 18S_rRNA:1000
 
 #### 4. Preparing the repository
 
-Upload the repository to the created folder.
+Upload `config.yaml` file into the BaNaNA folder.
 
-```
-scp -r BaNaNA-main login@hpc.icm.edu.pl:~/nanopore
-```
 
 Make all the scripts executable
 
@@ -155,18 +154,8 @@ Make all the scripts executable
 chmod a+x BaNaNA-main/scripts/*
 ```
 
-Create folder for samples inside the repository
-
-```
-cd BaNaNA-main
-mkdir samples
-```
-
 Copy raw reads to the `samples` folder
 
-```
-cp ../*.fastq samples
-```
 
 #### 5. Run the pipeline
 
@@ -177,7 +166,7 @@ conda config --add channels conda-forge
 conda config --add channels bioconda
 ```
 
-Run the command to install or the dependencies.
+Run the command to install or the dependencies (You have to be located in the BaNaNA folder).
 
 ```
 snakemake --use-conda --conda-create-envs-only
@@ -186,7 +175,7 @@ snakemake --use-conda --conda-create-envs-only
 If everything installed correctly run the analysis.
 
 ```
-snakemake --configfile config.yaml --use-conda --cores 1
+snakemake --configfile config.yaml --use-conda --cores 4
 ```
 
 
