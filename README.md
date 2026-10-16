@@ -59,7 +59,7 @@ screen -ls
 To login to the screen type:
 
 ```
-screen -r XXX.microeuk
+screen -r microeuk
 ```
 
 To exit the screen press ***CtrA+D*** on your keyboard.
