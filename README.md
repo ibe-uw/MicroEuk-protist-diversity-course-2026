@@ -45,6 +45,7 @@ scp file login@hpc.icm.edu.pl:~/location_of_the_file # To copy a file from your 
 After you login to the server activate script:
 
 ```
+bash
 /lu/topola/projects/microeuk/microeuk_startup_script.sh
 ```
 
