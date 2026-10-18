@@ -34,7 +34,7 @@ ssh login@hpc.icm.edu.pl
 
 Then type password and OTP number from authentication app.
 
-To copy a file from the server to your computer or the opposite use the commands below. You have to type it from the location of your computer, not the server.
+To copy a file from the server to your computer or the opposite use the commands below. You have to type it from the location of your computer, not the server. For easier access youse ***OnDemand*** service.
 
 ```
 scp login@hpc.icm.edu.pl:~/location_of_the_file ./ # To copy a file to your computer
