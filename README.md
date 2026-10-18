@@ -85,7 +85,7 @@ mkdir nanopore
 And copy raw reads there.
 
 ```
-cp ../../projects/microeuk/nanopore_raw nanopore
+cp -r ../../projects/microeuk/nanopore_raw nanopore
 ```
 
 To check quality of the data we will use [NanoPlot](https://github.com/wdecoster/NanoPlot). 
@@ -99,14 +99,32 @@ for folder in *; do NanoPlot --fastq "$folder"/*.fastq --tsv_stats --info_in_rep
 NanoPlot produces a lot of outputs. One of them is general statistics `NanoStats.txt`. The other ones are plots. Download to your computer two of them `LengthvsQualityScatterPlot_dot.png` and `Non_weightedHistogramReadlength.png` and inspect.
 
 
-#### 2. Copy the repository from shared folder into the `nanopore` folder
+### 2. Remove primers
+
+Replace `X` with the sample name.
 
 ```
+conda activate cutadapt_env
+mkdir trimmed
+cd trimmed
+
+cutadapt -g AACCTGGTTGATCCTGCCAGT -o X.t1.fastq ../nanopore_raw/X.fastq
+cutadapt -g CCTTGGTCCGTGTTTCAAGA -o X.t2.fastq X.t1.fastq
+cutadapt -a ACTGGCAGGATCAACCAGGTT -o X.t3.fastq X.t2.fastq
+cutadapt -a TCTTGAAACACGGACCAAGG -o X.t4.fastq X.t3.fastq
+mv X.t4.fastq X.fastq
+rm X.t*
+```
+
+#### 3. Copy the repository from shared folder into the `nanopore` folder
+
+```
+cd ../
 cp ../../projects/microeuk/BaNaNA .
 ```
 
 
-#### 3. Fill in the config file
+#### 4. Fill in the config file
 
 Inside the main folder you will find `config.yaml` file. Download it to your computer and Fill it according to the instruction.
 
@@ -144,7 +162,7 @@ rrnas: 18S_rRNA:1000
 * `enable_optional_taxonomy_format`: It's an optional step applied only for the PR2 database UTAX version (look ***Download PR2 database*** chapter), which creates a tab-separated table from raw VSEARCH output. If you are using a different database than PR2 or a different version of PR2 database, set this option to `false`.
 
 
-#### 4. Preparing the repository
+#### 5. Preparing the repository
 
 Upload `config.yaml` file into the BaNaNA folder.
 
@@ -155,12 +173,12 @@ Make all the scripts executable
 chmod a+x BaNaNA-main/scripts/*
 ```
 
-Copy raw reads to the `samples` folder
+Copy trimmed reads to the `samples` folder
 
 
-#### 5. Run the pipeline
+#### 6. Run the pipeline
 
-Add condo channels.
+Add conda channels.
 
 ```
 conda config --add channels conda-forge
@@ -180,7 +198,7 @@ snakemake --configfile config.yaml --use-conda --cores 4
 ```
 
 
-#### 6. Find the final output
+#### 7. Find the final output
 
 The piepline creates a folder `final` and places there all four final output files:
 * `otus.fasta` - final OTUs sequences
