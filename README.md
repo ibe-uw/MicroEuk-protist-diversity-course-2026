@@ -189,6 +189,7 @@ Run the command to install or the dependencies (You have to be located in the Ba
 
 ```
 cd BaNaNA
+conda activate snakemak_env
 snakemake --use-conda --conda-create-envs-only
 ```
 
