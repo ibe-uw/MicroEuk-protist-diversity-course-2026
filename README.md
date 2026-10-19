@@ -85,7 +85,7 @@ mkdir nanopore
 And copy raw reads there.
 
 ```
-cp -r ../../projects/microeuk/nanopore_raw nanopore
+cp -r ../../projects/microeuk/nanopore_raw/your_sample nanopore
 ```
 
 To check quality of the data we will use [NanoPlot](https://github.com/wdecoster/NanoPlot). 
