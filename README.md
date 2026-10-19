@@ -108,7 +108,7 @@ conda activate cutadapt_env
 mkdir trimmed
 cd trimmed
 
-cutadapt -g AACCTGGTTGATCCTGCCAGT -o X.t1.fastq ../nanopore/X.fastq
+cutadapt -g AACCTGGTTGATCCTGCCAGT -o X.t1.fastq ../X.fastq
 cutadapt -g CCTTGGTCCGTGTTTCAAGA -o X.t2.fastq X.t1.fastq
 cutadapt -a ACTGGCAGGATCAACCAGGTT -o X.t3.fastq X.t2.fastq
 cutadapt -a TCTTGAAACACGGACCAAGG -o X.t4.fastq X.t3.fastq
