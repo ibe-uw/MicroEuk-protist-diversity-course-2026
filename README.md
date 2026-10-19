@@ -91,9 +91,9 @@ cp -r ../../projects/microeuk/nanopore_raw nanopore
 To check quality of the data we will use [NanoPlot](https://github.com/wdecoster/NanoPlot). 
 
 ```
-conda activate nanoplot
+conda activate nanoplot_env
 cd nanopore
-for folder in *; do NanoPlot --fastq "$folder"/*.fastq --tsv_stats --info_in_report -o "$folder"/nanoplot_raw ; done
+NanoPlot --fastq {input} --tsv_stats -t {threads} --info_in_report -o {output}
 ```
 
 NanoPlot produces a lot of outputs. One of them is general statistics `NanoStats.txt`. The other ones are plots. Download to your computer two of them `LengthvsQualityScatterPlot_dot.png` and `Non_weightedHistogramReadlength.png` and inspect.
