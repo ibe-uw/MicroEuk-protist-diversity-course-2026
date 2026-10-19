@@ -170,7 +170,7 @@ Upload `config.yaml` file into the BaNaNA folder.
 Make all the scripts executable
 
 ```
-chmod a+x BaNaNA-main/scripts/*
+chmod a+x BaNaNA/scripts/*
 ```
 
 Copy trimmed reads to the `samples` folder
@@ -188,6 +188,7 @@ conda config --add channels bioconda
 Run the command to install or the dependencies (You have to be located in the BaNaNA folder).
 
 ```
+cd BaNaNA
 snakemake --use-conda --conda-create-envs-only
 ```
 
